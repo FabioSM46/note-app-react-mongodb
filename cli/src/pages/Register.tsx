@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -13,6 +12,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
+import { register } from "@/services/auth.service";
+import { NavigateFunction, useNavigate } from 'react-router-dom';
 
 const formSchema = z
   .object({
@@ -37,7 +38,7 @@ const formSchema = z
   });
 
 export function Register() {
-  // 1. Define your form.
+  const navigate: NavigateFunction = useNavigate();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -45,10 +46,14 @@ export function Register() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      register(values.username, values.email, values.password);
+      navigate("/login")
+      window.location.reload();
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   return (
@@ -80,9 +85,6 @@ export function Register() {
                 <FormControl>
                   <Input placeholder="Email" {...field} />
                 </FormControl>
-                <FormDescription>
-                  This is your public display name.
-                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -96,9 +98,6 @@ export function Register() {
                 <FormControl>
                   <Input placeholder="Password" {...field} />
                 </FormControl>
-                <FormDescription>
-                  This is your public display name.
-                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -112,9 +111,6 @@ export function Register() {
                 <FormControl>
                   <Input placeholder="Confirm Password" {...field} />
                 </FormControl>
-                <FormDescription>
-                  This is your public display name.
-                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
