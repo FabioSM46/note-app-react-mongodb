@@ -12,8 +12,10 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { useForm } from 'react-hook-form'
-import { login } from '@/services/auth.service'
 import { NavigateFunction, useNavigate } from 'react-router-dom'
+import authService from '../services/auth.service'
+import { useContext } from 'react'
+import { AuthContext } from '@/context/auth.context'
 
 const formSchema = z.object({
   email: z.string().email({
@@ -25,6 +27,7 @@ const formSchema = z.object({
 })
 
 export function Login() {
+  const { storeToken, authenticateUser } = useContext(AuthContext)
   const navigate: NavigateFunction = useNavigate()
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -34,14 +37,22 @@ export function Login() {
     },
   })
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      await login(values.email, values.password)
-      navigate('/')
-      window.location.reload()
-    } catch (error) {
-      console.log(error)
-    }
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    authService
+      .login(values.email, values.password)
+      .then((response) => {
+        // Save the token in the localStorage.
+        storeToken(JSON.stringify(response.data.authToken))
+
+        // Verify the token by sending a request
+        // to the server's JWT validation endpoint.
+        authenticateUser()
+        navigate('/')
+        window.location.reload()
+      })
+      .catch((error) => {
+        console.log(error)
+      })
   }
 
   return (

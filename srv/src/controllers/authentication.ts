@@ -1,77 +1,106 @@
 import { createUser, getUserByEmail } from "../db/users";
 import express from "express";
-import { authentication, random } from "../helpers";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import { envServerSchema } from "../serverEnvSchema";
 
-const domain = envServerSchema.DOMAIN;
+interface CustomRequest extends express.Request {
+  payload: {
+    _id: string;
+    email: string;
+    username: string;
+    iat: number;
+    exp: number;
+  };
+}
+
+type LoginBody = {
+  email: string;
+  password: string;
+};
+
+const saltRounds = 10;
 
 export const login = async (req: express.Request, res: express.Response) => {
-  try {
-    const { email, password } = req.body;
+  const { email, password } = req.body as LoginBody;
 
-    if (!email || !password) {
-      return res.sendStatus(400);
-    }
+  if (!email || !password) {
+    return res.sendStatus(400);
+  }
 
-    const user = await getUserByEmail(email).select(
-      "+authentication.salt +authentication.password"
-    );
+  const foundUser = await getUserByEmail(email).select("+password");
 
-    if (!user) {
-      return res.sendStatus(400);
-    }
+  if (!foundUser) {
+    // If the user is not found, send an error response
+    res.status(401).json({ message: "User not found." });
+    return;
+  }
 
-    const expectedHash = authentication(user.authentication.salt, password);
+  // Compare the provided password with the one saved in the database
+  const passwordCorrect = bcrypt.compareSync(password, foundUser.password);
 
-    if (user.authentication.password != expectedHash) {
-      return res.sendStatus(403);
-    }
+  if (passwordCorrect) {
+    // Deconstruct the user object to omit the password
+    const { _id, email, username } = foundUser;
 
-    const salt = random();
-    user.authentication.sessionToken = authentication(
-      salt,
-      user._id.toString()
-    );
+    // Create an object that will be set as the token payload
+    const payload = { _id, email, username };
 
-    await user.save();
-
-    res.cookie("SESSION-AUTH", user.authentication.sessionToken, {
-      domain: "localhost",
-      path: "/",
-/*       httpOnly: true,
-      secure: false,
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week */
+    // Create a JSON Web Token and sign it
+    const authToken = jwt.sign(payload, envServerSchema.SECRET, {
+      algorithm: "HS256",
+      expiresIn: "24h",
     });
 
-    return res.status(200).json(user).end();
-  } catch (error) {
-    console.log(error);
-    return res.sendStatus(400);
+    // Send the token as the response
+    res.status(200).json({ authToken: authToken });
+  } else {
+    res.status(401).json({ message: "Unable to authenticate the user" });
   }
 };
 
 export const register = async (req: express.Request, res: express.Response) => {
+  const { email, password, username } = req.body;
+
+  // Check if email or password or name are provided as empty strings
+  if (email === "" || password === "" || username === "") {
+    res.status(400).json({ message: "Provide email, password and name" });
+    return;
+  }
+
+  // This regular expression check that the email is of a valid format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  if (!emailRegex.test(email)) {
+    res.status(400).json({ message: "Provide a valid email address." });
+    return;
+  }
+
+  // This regular expression checks password for special characters and minimum length
+  /*   const passwordRegex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/;
+  if (!passwordRegex.test(password)) {
+    res.status(400).json({
+      message:
+        "Password must have at least 6 characters and contain at least one number, one lowercase and one uppercase letter.",
+    });
+    return;
+  } */
+
+  // Check the users collection if a user with the same email already exists
   try {
-    const { email, password, username } = req.body;
-    if (!email || !password || !username) {
-      console.log("Missing fields");
-      return res.sendStatus(400);
+    const foundUser = await getUserByEmail(email);
+    if (foundUser) {
+      res.status(400).json({ message: "User already exists." });
+      return;
     }
 
-    const existingUser = await getUserByEmail(email);
-    if (existingUser) {
-      console.log("User already exists");
-      return res.sendStatus(400);
-    }
+    // If email is unique, proceed to hash the password
+    const salt = bcrypt.genSaltSync(saltRounds);
+    const hashedPassword = bcrypt.hashSync(password, salt);
 
-    const salt = random();
     const user = await createUser({
       email,
       username,
-      authentication: {
-        salt,
-        password: authentication(salt, password),
-      },
+      password: hashedPassword,
     });
     console.log("User created");
     return res.status(200).json(user).end();
@@ -79,4 +108,8 @@ export const register = async (req: express.Request, res: express.Response) => {
     console.log(error);
     return res.sendStatus(400);
   }
+};
+
+export const verify = async (req: CustomRequest, res: express.Response) => {
+  res.status(200).json(req.payload);
 };

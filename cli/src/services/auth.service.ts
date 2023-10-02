@@ -1,38 +1,51 @@
 import { envClientSchema } from '@/clientEnvSchema'
-import axios from 'axios'
+import axios, { AxiosInstance } from 'axios'
 
-const API_URL = envClientSchema.REACT_APP_SERVER_URL
+class AuthService {
+  api: AxiosInstance // Define the 'api' property
 
-export const register = (username: string, email: string, password: string) => {
-  return axios.post(API_URL + '/auth/register', {
-    username,
-    email,
-    password,
-  })
-}
+  constructor() {
+    // Create a new instance of axios with a custom configuration
+    this.api = axios.create({
+      baseURL: envClientSchema.REACT_APP_SERVER_URL,
+      // We set our API's base URL so that all requests use the same base URL
+    })
 
-export const login = (email: string, password: string) => {
-  return axios
-    .post(API_URL + '/auth/login', {
+    // Automatically set JWT token in the headers for every request
+    this.api.interceptors.request.use((config) => {
+      // Retrieve the JWT token from the local storage
+      const storedToken = localStorage.getItem('authToken')
+
+      if (storedToken) {
+        config.headers['Authorization'] = `Bearer ${storedToken}`
+      }    
+      return config
+    })
+  }
+
+  login = (email: string, password: string) => {
+    const requestBody = {
       email,
       password,
-    })
-    .then((response) => {
-      if (response.data.accessToken) {
-        localStorage.setItem('user', JSON.stringify(response.data))
-      }
+    }
+    return this.api.post('/auth/login', requestBody)
+  }
 
-      return response.data
-    })
+  register = (username: string, email: string, password: string) => {
+    const requestBody = {
+      username,
+      email,
+      password,
+    }
+    return this.api.post('/auth/signup', requestBody)
+  }
+
+  verify = () => {
+    return this.api.get('/auth/verify')
+  }
 }
 
-export const logout = () => {
-  localStorage.removeItem('user')
-}
+// Create one instance object
+const authService = new AuthService()
 
-export const getCurrentUser = () => {
-  const userStr = localStorage.getItem('user')
-  if (userStr) return JSON.parse(userStr)
-
-  return null
-}
+export default authService

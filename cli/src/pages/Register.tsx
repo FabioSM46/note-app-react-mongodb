@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { useForm } from 'react-hook-form'
-import { register } from '@/services/auth.service'
+import authService from '../services/auth.service'
 import { NavigateFunction, useNavigate } from 'react-router-dom'
 
 const formSchema = z
@@ -48,7 +48,7 @@ export function Register() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      register(values.username, values.email, values.password)
+      authService.register(values.username, values.email, values.password)
       navigate('/login')
       window.location.reload()
     } catch (error) {
