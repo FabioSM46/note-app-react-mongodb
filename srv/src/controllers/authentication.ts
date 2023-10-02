@@ -51,7 +51,7 @@ export const login = async (req: express.Request, res: express.Response) => {
       algorithm: "HS256",
       expiresIn: "24h",
     });
-
+    console.log("User logged in");
     // Send the token as the response
     res.status(200).json({ authToken: authToken });
   } else {
@@ -111,5 +111,6 @@ export const register = async (req: express.Request, res: express.Response) => {
 };
 
 export const verify = async (req: CustomRequest, res: express.Response) => {
+  console.log("User verified ", req.payload);
   res.status(200).json(req.payload);
 };

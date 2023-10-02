@@ -1,10 +1,18 @@
 import { useState, useEffect, createContext, PropsWithChildren } from 'react'
 import authService from '../services/auth.service'
 
+interface User {
+  _id: string
+  email: string
+  username: string
+  iat: number
+  exp: number
+}
+
 interface IAuth {
   isLoggedIn: boolean
   isLoading: boolean
-  user: null
+  user: User | null
   storeToken: (token: string) => void
   authenticateUser: () => void
   logOutUser: () => void
