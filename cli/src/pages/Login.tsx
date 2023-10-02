@@ -84,10 +84,7 @@ export function Login() {
                 <FormControl>
                   <Input placeholder='Password' {...field} />
                 </FormControl>
-                <FormDescription>
-                  This is your public display name.
-                </FormDescription>
-                <FormMessage />
+           
               </FormItem>
             )}
           />

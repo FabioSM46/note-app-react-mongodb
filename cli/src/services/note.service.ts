@@ -1,7 +1,7 @@
 import { envClientSchema } from '@/clientEnvSchema'
 import axios, { AxiosInstance } from 'axios'
 
-class AuthService {
+class NoteService {
   api: AxiosInstance // Define the 'api' property
 
   constructor() {
@@ -18,34 +18,22 @@ class AuthService {
 
       if (storedToken) {
         config.headers['Authorization'] = `Bearer ${storedToken}`
-      }    
+      }
       return config
     })
   }
 
-  login = (email: string, password: string) => {
+  createNote = (title: string, content?: string, author?: string) => {
     const requestBody = {
-      email,
-      password,
+      title,
+      content,
+      author,
     }
-    return this.api.post('/auth/login', requestBody)
-  }
-
-  register = (username: string, email: string, password: string) => {
-    const requestBody = {
-      username,
-      email,
-      password,
-    }
-    return this.api.post('/auth/register', requestBody)
-  }
-
-  verify = () => {
-    return this.api.get('/auth/verify')
+    return this.api.post('/api/newnote', requestBody)
   }
 }
 
 // Create one instance object
-const authService = new AuthService()
+const noteService = new NoteService()
 
-export default authService
+export default noteService

@@ -11,7 +11,7 @@ import { useContext } from 'react'
 
 export const NavBar = () => {
   const { isLoggedIn, user, logOutUser } = useContext(AuthContext)
-  
+
   return (
     <NavigationMenu className='bg-slate-200'>
       <NavigationMenuList>
@@ -21,7 +21,7 @@ export const NavBar = () => {
             <ul>
               <li>
                 <NavigationMenuLink asChild>
-                  <a href='/'>
+                  <a href='/notes'>
                     <p className='whitespace-nowrap bg-white p-2 transition-colors duration-300 ease-in-out hover:bg-slate-200'>
                       Notes
                     </p>
@@ -51,7 +51,12 @@ export const NavBar = () => {
         </NavigationMenuItem>
         <NavigationMenuItem>
           {isLoggedIn ? (
-            <button onClick={logOutUser}>Logout</button>
+            <button
+              className='group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50'
+              onClick={logOutUser}
+            >
+              Logout
+            </button>
           ) : (
             <NavigationMenuLink
               href='/login'
