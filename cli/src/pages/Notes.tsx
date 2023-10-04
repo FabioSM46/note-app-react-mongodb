@@ -1,3 +1,4 @@
+import NoteCard from '@/components/NoteCard'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -18,10 +19,11 @@ import {
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { AuthContext } from '@/context/auth.context'
+import { Note } from '@/lib/interfaces'
 import noteService from '@/services/note.service'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { PlusSquare } from 'lucide-react'
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { NavigateFunction, useNavigate } from 'react-router-dom'
 import * as z from 'zod'
@@ -45,6 +47,7 @@ const formSchema = z.object({
 export const Notes = () => {
   const { user } = useContext(AuthContext)
   const navigate: NavigateFunction = useNavigate()
+  const [notes, setNotes] = useState<Note[]>([])
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -56,7 +59,6 @@ export const Notes = () => {
   })
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log('submitting note from ', values.author)
     try {
       noteService.createNote(
         values.title,
@@ -69,6 +71,16 @@ export const Notes = () => {
       console.log(error)
     }
   }
+
+  useEffect(() => {
+    async function getUserAndNotes() {
+      if (!user) return
+      const result = await noteService.getUserWithNotes(user._id)
+      setNotes(result?.data.notesId)
+    }
+
+    getUserAndNotes() // Call the function inside useEffect
+  }, [user])
 
   return (
     <div>
@@ -119,6 +131,11 @@ export const Notes = () => {
           </Form>
         </DialogContent>
       </Dialog>
+      <div>
+        {notes.map((note, index) => (
+          <NoteCard key={index} title={note.title} content={note.content} />
+        ))}
+      </div>
     </div>
   )
 }

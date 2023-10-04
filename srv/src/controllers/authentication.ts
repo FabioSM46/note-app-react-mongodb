@@ -111,6 +111,6 @@ export const register = async (req: express.Request, res: express.Response) => {
 };
 
 export const verify = async (req: CustomRequest, res: express.Response) => {
-  console.log("User verified ", req.payload);
+  console.log("User verified");
   res.status(200).json(req.payload);
 };
