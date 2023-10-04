@@ -13,14 +13,23 @@ interface NoteCardProps {
   title: string
   content?: string
   noteId: string
-  onClick: () => void
+  onDelete: () => void
+  onEdit: () => void
 }
 
-const NoteCard: FC<NoteCardProps> = ({ title, content, noteId, onClick }) => {
+const NoteCard: FC<NoteCardProps> = ({
+  title,
+  content,
+  noteId,
+  onDelete,
+  onEdit,
+}) => {
   const delNote = async (id: string) => {
     await noteService.deleteNote(id)
-    console.log('Note deleted')
   }
+  /*   const updateNote = async (id: string) => {
+    await noteService.updateNote(id, values)
+  } */
   return (
     <Card className='w-[350px]'>
       <CardHeader>
@@ -33,12 +42,20 @@ const NoteCard: FC<NoteCardProps> = ({ title, content, noteId, onClick }) => {
           onClick={(e) => {
             e.preventDefault()
             delNote(noteId)
-            onClick()
+            onDelete()
           }}
         >
           Delete
         </Button>
-        <Button>Edit</Button>
+        <Button
+          onClick={(e) => {
+            e.preventDefault()
+            /* updateNote(noteId) */
+            onEdit()
+          }}
+        >
+          Edit
+        </Button>
       </CardFooter>
     </Card>
   )

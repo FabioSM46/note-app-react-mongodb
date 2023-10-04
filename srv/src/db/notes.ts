@@ -1,5 +1,6 @@
 import mongoose, { ObjectId, SaveOptions } from "mongoose";
 import { UserModel } from "./users";
+import { NoteInterface } from "lib/interfaces";
 
 const NoteSchema = new mongoose.Schema({
   title: { type: String },
@@ -9,12 +10,7 @@ const NoteSchema = new mongoose.Schema({
 
 export const NoteModel = mongoose.model("Note", NoteSchema);
 
-interface NoteInterface {
-  _id?: ObjectId;
-  title: string;
-  content: string;
-  author: string;
-}
+
 
 export const createNote = async (values: NoteInterface) => {
   try {
@@ -40,5 +36,5 @@ export const findNotes = async (id: string) => {
 
 export const deleteNoteById = (id: string) => NoteModel.findByIdAndDelete(id);
 
-export const updateNoteById = (id: string, values: Record<string, any>) =>
+export const updateNoteById = (id: string, values: NoteInterface) =>
   NoteModel.findByIdAndUpdate(id, values);

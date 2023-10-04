@@ -3,10 +3,7 @@ import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
-  DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
 import {
@@ -48,8 +45,12 @@ export const Notes = () => {
   const [notes, setNotes] = useState<Note[]>([])
   const [buttonClicked, setButtonClicked] = useState(false)
   const [open, setOpen] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editingNoteId, setEditingNoteId] = useState('')
+  const [title, setTitle] = useState('')
+  const [content, setContent] = useState('')
 
-  const updateButtonClickedState = () => {
+  const refreshOnButtonClick = () => {
     setButtonClicked(!buttonClicked)
   }
 
@@ -63,19 +64,47 @@ export const Notes = () => {
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      await noteService.createNote(
-        values.title,
-        values.content,
-        (values.author = user?._id),
-      )
-      form.reset()
-      updateButtonClickedState()
-      setOpen(false)
-    } catch (error) {
-      console.log(error)
+    if (!isEditing) {
+      try {
+        await noteService.createNote(
+          values.title,
+          values.content,
+          (values.author = user?._id),
+        )
+        form.reset()
+        refreshOnButtonClick()
+        setOpen(false)
+      } catch (error) {
+        console.log(error)
+      }
+    } else {
+      try {
+        await noteService.updateNote(
+          editingNoteId,
+          values.title,
+          values.content || '',
+        )
+        refreshOnButtonClick()
+        setOpen(false)
+      } catch (error) {
+        console.log(error)
+      }
     }
   }
+
+  useEffect(() => {
+    if (isEditing) {
+      form.setValue('title', title)
+      form.setValue('content', content)
+    }
+  }, [title, content, isEditing, form])
+
+  useEffect(() => {
+    if (!open) {
+      setTitle('')
+      setContent('')
+    }
+  }, [open])
 
   useEffect(() => {
     async function getUserAndNotes() {
@@ -91,7 +120,13 @@ export const Notes = () => {
     <div>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button className='border-2 border-slate-600 bg-white text-slate-600 hover:bg-slate-600 hover:text-white'>
+          <Button
+            onClick={() => {
+              setIsEditing(false)
+              form.reset()
+            }}
+            className='border-2 border-slate-600 bg-white text-slate-600 hover:bg-slate-600 hover:text-white'
+          >
             <PlusSquare />
           </Button>
         </DialogTrigger>
@@ -99,12 +134,6 @@ export const Notes = () => {
         <DialogContent className='sm:max-w-[425px]'>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
-              <DialogHeader>
-                <DialogTitle>New Note</DialogTitle>
-                <DialogDescription>
-                  Create a new Note. Click save when you're done.
-                </DialogDescription>
-              </DialogHeader>
               <FormField
                 control={form.control}
                 name='title'
@@ -143,7 +172,14 @@ export const Notes = () => {
             title={note.title}
             content={note.content}
             noteId={note._id}
-            onClick={updateButtonClickedState}
+            onDelete={refreshOnButtonClick}
+            onEdit={() => {
+              setIsEditing(true)
+              setOpen(true)
+              setTitle(note.title)
+              setContent(note.content)
+              setEditingNoteId(note._id)
+            }}
           />
         ))}
       </div>
