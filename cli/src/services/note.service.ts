@@ -23,13 +23,22 @@ class NoteService {
     })
   }
 
-  createNote = (title: string, content?: string, author?: string) => {
+  createNote = async (title: string, content?: string, author?: string) => {
     const requestBody = {
       title,
       content,
       author,
     }
-    return this.api.post('/api/newnote', requestBody)
+    return await this.api.post('/api/newnote', requestBody)
+  }
+
+  getUserWithNotes = async (id: string) => {
+    try {
+      const result = await this.api.get(`/api/notes/${id}`)
+      return result
+    } catch (error) {
+      console.log(error)
+    }
   }
 }
 

@@ -1,4 +1,5 @@
-import mongoose from "mongoose";
+import mongoose, { ObjectId, SaveOptions } from "mongoose";
+import { UserModel } from "./users";
 
 const NoteSchema = new mongoose.Schema({
   title: { type: String },
@@ -9,18 +10,33 @@ const NoteSchema = new mongoose.Schema({
 export const NoteModel = mongoose.model("Note", NoteSchema);
 
 interface NoteInterface {
+  _id?: ObjectId;
   title: string;
   content: string;
   author: string;
 }
 
-export const createNote = (values: NoteInterface) => {
-  new NoteModel(values).save().then((note) => note.toObject());
+export const createNote = async (values: NoteInterface) => {
+  try {
+    const newNote = new NoteModel(values);
+    const savedNote = await newNote.save();
+
+    // Update the user document by pushing the new note's ID to the notesId array
+    const userId = savedNote.author._id.toString();
+    await UserModel.findByIdAndUpdate(userId, {
+      $push: { notesId: savedNote._id },
+    });
+
+    console.log("User updated");
+  } catch (err) {
+    console.error(err);
+  }
 };
 
-export const getAllNotes = () => NoteModel.find().populate("author").exec();
-
-export const getNoteById = (id: string) => NoteModel.findById(id);
+export const findNotes = async (id: string) => {
+  const userWithNotes = await UserModel.findById(id).populate("notesId").exec();
+  return userWithNotes;
+};
 
 export const deleteNoteById = (id: string) => NoteModel.findByIdAndDelete(id);
 

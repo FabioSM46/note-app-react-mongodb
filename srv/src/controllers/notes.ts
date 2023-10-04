@@ -1,5 +1,6 @@
 import express from "express";
-import { createNote, getAllNotes } from "../db/notes";
+import { createNote, findNotes } from "../db/notes";
+import mongoose from "mongoose";
 
 export const postNote = async (req: express.Request, res: express.Response) => {
   const { title, content, author } = req.body;
@@ -9,8 +10,9 @@ export const postNote = async (req: express.Request, res: express.Response) => {
       content,
       author,
     });
+
     console.log("New note created");
-    return res.status(200).json(note).end();
+    return res.status(200).json(note);
   } catch (error) {
     console.log(error);
     return res.sendStatus(400);
@@ -18,15 +20,22 @@ export const postNote = async (req: express.Request, res: express.Response) => {
 };
 
 export const getNotes = async (req: express.Request, res: express.Response) => {
-const { id } = req.params;
+  const { id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    res.status(400).json({ message: "Specified id is not valid" });
+    return;
+  }
+
   try {
-    const notes = await getAllNotes();
+    const userWithNotes = await findNotes(id);
     console.log("Notes retrieved");
-    return res.status(200).json(notes);
+    console.log(userWithNotes);
+    return res.status(200).json(userWithNotes);
   } catch (error) {
     console.log(error);
     return res.sendStatus(400);
-  } 
+  }
 };
 
 export const deleteNote = async (
