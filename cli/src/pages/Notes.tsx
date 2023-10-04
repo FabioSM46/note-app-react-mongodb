@@ -25,7 +25,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { PlusSquare } from 'lucide-react'
 import { useContext, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { NavigateFunction, useNavigate } from 'react-router-dom'
 import * as z from 'zod'
 
 const formSchema = z.object({
@@ -46,8 +45,13 @@ const formSchema = z.object({
 
 export const Notes = () => {
   const { user } = useContext(AuthContext)
-  const navigate: NavigateFunction = useNavigate()
   const [notes, setNotes] = useState<Note[]>([])
+  const [buttonClicked, setButtonClicked] = useState(false)
+  const [open, setOpen] = useState(false)
+
+  const updateButtonClickedState = () => {
+    setButtonClicked(!buttonClicked)
+  }
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -58,15 +62,16 @@ export const Notes = () => {
     },
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      noteService.createNote(
+      await noteService.createNote(
         values.title,
         values.content,
         (values.author = user?._id),
       )
-      navigate('/notes')
-      window.location.reload()
+      form.reset()
+      updateButtonClickedState()
+      setOpen(false)
     } catch (error) {
       console.log(error)
     }
@@ -79,12 +84,12 @@ export const Notes = () => {
       setNotes(result?.data.notesId)
     }
 
-    getUserAndNotes() // Call the function inside useEffect
-  }, [user])
+    getUserAndNotes()
+  }, [user, buttonClicked])
 
   return (
     <div>
-      <Dialog>
+      <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button className='border-2 border-slate-600 bg-white text-slate-600 hover:bg-slate-600 hover:text-white'>
             <PlusSquare />
@@ -133,7 +138,13 @@ export const Notes = () => {
       </Dialog>
       <div>
         {notes.map((note, index) => (
-          <NoteCard key={index} title={note.title} content={note.content} />
+          <NoteCard
+            key={index}
+            title={note.title}
+            content={note.content}
+            noteId={note._id}
+            onClick={updateButtonClickedState}
+          />
         ))}
       </div>
     </div>

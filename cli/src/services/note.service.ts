@@ -40,6 +40,15 @@ class NoteService {
       console.log(error)
     }
   }
+
+  deleteNote = async (id: string) => {
+    try {
+      await this.api.delete(`/api/notes/del/${id}`)
+      console.log('Note deleted')
+    } catch (error) {
+      console.log(error)
+    }
+  }
 }
 
 // Create one instance object
