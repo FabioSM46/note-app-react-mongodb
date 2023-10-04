@@ -1,6 +1,12 @@
 import express from "express";
-import { createNote, deleteNoteById, findNotes } from "../db/notes";
+import {
+  createNote,
+  deleteNoteById,
+  findNotes,
+  updateNoteById,
+} from "../db/notes";
 import mongoose from "mongoose";
+import { NoteInterface } from "lib/interfaces";
 
 export const postNote = async (req: express.Request, res: express.Response) => {
   const { title, content, author } = req.body;
@@ -61,4 +67,20 @@ export const deleteNote = async (
 export const updateNote = async (
   req: express.Request,
   res: express.Response
-) => {};
+) => {
+  const { id } = req.params;
+  const values: NoteInterface = req.body;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    res.status(400).json({ message: "Specified id is not valid" });
+    return;
+  }
+
+  try {
+    const updateNote = await updateNoteById(id, values);
+    console.log("Note updated");
+    return res.status(200).json(updateNote);
+  } catch (error) {
+    console.log(error);
+    return res.sendStatus(400);
+  }
+};

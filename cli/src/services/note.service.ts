@@ -29,7 +29,12 @@ class NoteService {
       content,
       author,
     }
-    return await this.api.post('/api/newnote', requestBody)
+
+    try {
+      await this.api.post('/api/newnote', requestBody)
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   getUserWithNotes = async (id: string) => {
@@ -45,6 +50,24 @@ class NoteService {
     try {
       await this.api.delete(`/api/notes/del/${id}`)
       console.log('Note deleted')
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  updateNote = async (
+    id: string,
+    title: string,
+    content: string,
+  ) => {
+    const requestBody = {
+      title,
+      content,
+    }
+
+    try {
+      await this.api.patch(`/api/notes/update/${id}`, requestBody)
+      console.log('Note updated')
     } catch (error) {
       console.log(error)
     }

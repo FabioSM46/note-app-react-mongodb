@@ -1,10 +1,12 @@
 import { useState, useEffect, createContext, PropsWithChildren } from 'react'
 import authService from '../services/auth.service'
 import { IAuth } from '@/lib/interfaces'
+import { useNavigate } from 'react-router-dom'
 
 const AuthContext = createContext({} as IAuth)
 
 function AuthProviderWrapper(props: PropsWithChildren) {
+  const navigate = useNavigate()
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [user, setUser] = useState(null)
@@ -57,6 +59,7 @@ function AuthProviderWrapper(props: PropsWithChildren) {
     removeToken()
     // and update the state variables
     authenticateUser()
+    navigate('/')
   }
 
   useEffect(() => {

@@ -47,7 +47,7 @@ export function Login() {
         // Verify the token by sending a request
         // to the server's JWT validation endpoint.
         authenticateUser()
-        navigate('/')
+        navigate('/notes')
         window.location.reload()
       })
       .catch((error) => {
