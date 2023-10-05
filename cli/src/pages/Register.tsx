@@ -43,6 +43,9 @@ export function Register() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       username: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
     },
   })
 
@@ -83,7 +86,7 @@ export function Register() {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input placeholder='Email' {...field} />
+                  <Input placeholder='Email' type='email' {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -96,7 +99,7 @@ export function Register() {
               <FormItem>
                 <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <Input placeholder='Password' {...field} />
+                  <Input placeholder='Password' type='password' {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -109,7 +112,11 @@ export function Register() {
               <FormItem>
                 <FormLabel>Confirm Password</FormLabel>
                 <FormControl>
-                  <Input placeholder='Confirm Password' {...field} />
+                  <Input
+                    placeholder='Confirm Password'
+                    type='password'
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
