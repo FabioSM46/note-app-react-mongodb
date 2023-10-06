@@ -6,6 +6,8 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { generateFromString } from 'generate-avatar'
 import { AuthContext } from '@/context/auth.context'
 import { useContext } from 'react'
 
@@ -65,6 +67,17 @@ export const NavBar = () => {
               Login
             </NavigationMenuLink>
           )}
+        </NavigationMenuItem>
+        <NavigationMenuItem className='flex items-center justify-center gap-3'>
+          <Avatar>
+            <AvatarImage
+              src={`data:image/svg+xml;utf8,${generateFromString(
+                user ? `${user?.username}` : 'Visitor',
+              )}`}
+            />
+            <AvatarFallback>{user ? user.username : 'Visitor'}</AvatarFallback>
+          </Avatar>
+          {user ? user.username : 'Visitor'}
         </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>
