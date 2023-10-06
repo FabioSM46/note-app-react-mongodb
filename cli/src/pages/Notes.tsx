@@ -165,23 +165,32 @@ export const Notes = () => {
           </Form>
         </DialogContent>
       </Dialog>
-      <div>
-        {notes.map((note, index) => (
-          <NoteCard
-            key={index}
-            title={note.title}
-            content={note.content}
-            noteId={note._id}
-            onDelete={refreshOnButtonClick}
-            onEdit={() => {
-              setIsEditing(true)
-              setOpen(true)
-              setTitle(note.title)
-              setContent(note.content)
-              setEditingNoteId(note._id)
-            }}
-          />
-        ))}
+      <div className='flex justify-center'>
+        <div className='-mx-1 flex max-w-screen-2xl flex-wrap lg:-mx-4'>
+          {notes
+            .map((note, index) => (
+              <div
+                key={index}
+                className='my-1 w-full justify-center px-1 md:w-1/2 lg:my-4 lg:w-1/3 lg:px-4'
+              >
+                <NoteCard
+                  className='mx-auto max-w-md overflow-hidden shadow-lg'
+                  title={note.title}
+                  content={note.content}
+                  noteId={note._id}
+                  onDelete={refreshOnButtonClick}
+                  onEdit={() => {
+                    setIsEditing(true)
+                    setOpen(true)
+                    setTitle(note.title)
+                    setContent(note.content)
+                    setEditingNoteId(note._id)
+                  }}
+                />
+              </div>
+            ))
+            .reverse()}
+        </div>
       </div>
     </div>
   )
