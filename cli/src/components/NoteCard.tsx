@@ -13,6 +13,7 @@ interface NoteCardProps {
   title: string
   content?: string
   noteId: string
+  className?: string
   onDelete: () => void
   onEdit: () => void
 }
@@ -21,6 +22,7 @@ const NoteCard: FC<NoteCardProps> = ({
   title,
   content,
   noteId,
+  className,
   onDelete,
   onEdit,
 }) => {
@@ -31,7 +33,7 @@ const NoteCard: FC<NoteCardProps> = ({
     await noteService.updateNote(id, values)
   } */
   return (
-    <Card className='w-[350px]'>
+    <Card className={`${className}`}>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
       </CardHeader>
