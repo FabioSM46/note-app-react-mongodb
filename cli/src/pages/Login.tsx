@@ -5,7 +5,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
+  FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { AuthContext } from '@/context/auth.context'
@@ -55,7 +55,7 @@ export function Login() {
   }
 
   return (
-    <div className='absolute left-1/2 top-1/2 w-1/4 -translate-x-1/2 -translate-y-1/2 rounded-lg border border-black p-5'>
+    <div className='absolute left-1/2 top-1/2 w-4/5 max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-lg border border-black p-5'>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
           <FormField

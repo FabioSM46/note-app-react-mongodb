@@ -1,3 +1,4 @@
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -6,9 +7,9 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { generateFromString } from 'generate-avatar'
 import { AuthContext } from '@/context/auth.context'
+import { generateFromString } from 'generate-avatar'
+import { Menu, X } from 'lucide-react'
 import { useContext } from 'react'
 
 export const NavBar = () => {
@@ -16,10 +17,11 @@ export const NavBar = () => {
 
   return (
     <NavigationMenu className='bg-slate-200'>
-      <NavigationMenuList>
+      {/* Normal Menu */}
+      <NavigationMenuList className='hidden gap-6 md:flex'>
         <NavigationMenuItem>
           <NavigationMenuTrigger>My Notes</NavigationMenuTrigger>
-          <NavigationMenuContent>
+          <NavigationMenuContent className='absolute top-full'>
             <ul>
               <li>
                 <NavigationMenuLink asChild>
@@ -80,6 +82,53 @@ export const NavBar = () => {
           {user ? user.username : 'Visitor'}
         </NavigationMenuItem>
       </NavigationMenuList>
+
+      {/* Mobile Menu */}
+
+      <NavigationMenuItem className='ml-auto mr-5 flex max-w-fit flex-1 items-center justify-end md:hidden'>
+        <NavigationMenuTrigger>
+          {' '}
+          <Menu
+            className='transition duration-300 group-data-[state=open]:hidden'
+            aria-hidden='true'
+          />
+          <X
+            className='transition duration-300 group-data-[state=closed]:hidden'
+            aria-hidden='true'
+          />
+        </NavigationMenuTrigger>
+        <NavigationMenuContent className='absolute left-auto right-0 top-full w-auto'>
+          <ul>
+            <li>
+              <NavigationMenuLink asChild>
+                <a href='/notes'>
+                  <p className='whitespace-nowrap bg-white p-2 transition-colors duration-300 ease-in-out hover:bg-slate-200'>
+                    Notes
+                  </p>
+                </a>
+              </NavigationMenuLink>
+            </li>
+            <li>
+              <NavigationMenuLink asChild>
+                <a href='/archived'>
+                  <p className='whitespace-nowrap bg-white p-2 transition-colors duration-300 ease-in-out hover:bg-slate-200'>
+                    Archived
+                  </p>
+                </a>
+              </NavigationMenuLink>
+            </li>
+            <li>
+              <NavigationMenuLink asChild>
+                <a href='/deleted'>
+                  <p className='whitespace-nowrap bg-white p-2 transition-colors duration-300 ease-in-out hover:bg-slate-200'>
+                    Deleted
+                  </p>
+                </a>
+              </NavigationMenuLink>
+            </li>
+          </ul>
+        </NavigationMenuContent>
+      </NavigationMenuItem>
     </NavigationMenu>
   )
 }
